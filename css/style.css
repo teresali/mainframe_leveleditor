@@ -1,0 +1,143 @@
+/* Custom CSS */
+body, html {
+  overflow: scroll;
+  margin: 0;
+  padding: 0;
+  background: #D3D3D3;
+}
+
+#title {
+  font-size: 16pt;
+  font-family: 300 'Roboto', sans-serif;
+  color: white;
+  padding: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#wrapper {
+  background-color: #D3D3D3;
+  padding: 25px;
+  margin-top:40px;
+}
+
+#instructions {
+  overflow: scroll;
+  height: 570px;
+  background-color: #2a2a2a;
+  color: white;
+  padding: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#canvas {
+  position: absolute;
+}
+
+.key {
+  float: left;
+  width: 35px;
+  height: 35px;
+  text-align: center;
+  margin: 0 5px 5px 0;
+  line-height: 35px;
+  background: #fff;
+  border: 1px solid #f9f9f9;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  color: #2a2a2a;
+}
+
+#spacebar {
+  float: left;
+  width: 150px;
+  height: 40px;
+  text-align: center;
+  margin: 0 5px 5px 0;
+  line-height: 40px;
+  background: #fff;
+  border: 1px solid #f9f9f9;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  color: #2a2a2a;
+}
+
+.step {
+  margin-top:10px;
+  margin-bottom: 10px;
+  text-transform:none;
+  font-size:9pt;
+}
+
+.keys {
+  padding: 5px;
+  list-style: none;
+  position: relative;
+}
+
+.text-9 {
+  margin-top: 10px;
+  font-size: 9pt;
+  padding-left: 15px;
+}
+
+.padding-10 {
+  padding: 10px;
+}
+
+.clearfix:before,
+.clearfix:after {
+    content:"";
+    display:table;
+}
+.clearfix:after {
+    clear:both;
+}
+.clearfix {
+    zoom:1; /* For IE 6/7 (trigger hasLayout) */
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+.msg {
+  color: #D4E157;
+}
+
+path { 
+/*    stroke: red;
+    stroke-width: 1;*/
+    stroke-opacity: .8;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.hexagon {
+  fill: none;
+/*  stroke-width: .5px;*/
+}

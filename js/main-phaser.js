@@ -158,53 +158,55 @@ window.onload = function() {
 
         paletteArrow = game.add.sprite(8, 36, 'arrow');
 
+        widthText = game.add.text(rightCol, 60, "LEVEL CONFIG", { font: "18px Helvetica", fill: "#fff", tabs: 80 });
         //  Change width
-        widthText = game.add.text(rightCol, 60, "Width: " + spriteWidth, style);
+        widthText = game.add.text(rightCol+20, 100, "X Tiles: " + spriteWidth, style);
 
-        widthUp = game.add.sprite(rightCol + 180, 60, 'plus');
+        widthUp = game.add.sprite(rightCol + 180, 100, 'plus');
         widthUp.name = 'width';
         widthUp.inputEnabled = true;
         widthUp.input.useHandCursor = true;
         widthUp.events.onInputDown.add(increaseSize, this);
 
-        widthDown = game.add.sprite(rightCol + 220, 60, 'minus');
+        widthDown = game.add.sprite(rightCol + 220, 100, 'minus');
         widthDown.name = 'width';
         widthDown.inputEnabled = true;
         widthDown.input.useHandCursor = true;
         widthDown.events.onInputDown.add(decreaseSize, this);
 
         //  Change height
-        heightText = game.add.text(rightCol, 100, "Height: " + spriteHeight, style);
+        heightText = game.add.text(rightCol+20, 140, "Y Tiles: " + spriteHeight, style);
 
-        heightUp = game.add.sprite(rightCol + 180, 100, 'plus');
+        heightUp = game.add.sprite(rightCol + 180, 140, 'plus');
         heightUp.name = 'height';
         heightUp.inputEnabled = true;
         heightUp.input.useHandCursor = true;
         heightUp.events.onInputDown.add(increaseSize, this);
 
-        heightDown = game.add.sprite(rightCol + 220, 100, 'minus');
+        heightDown = game.add.sprite(rightCol + 220, 140, 'minus');
         heightDown.name = 'height';
         heightDown.inputEnabled = true;
         heightDown.input.useHandCursor = true;
         heightDown.events.onInputDown.add(decreaseSize, this);
 
         // Change speed
-        speedText = game.add.text(rightCol, 140, "Speed: " + speed, style);
+        speedText = game.add.text(rightCol+20, 180, "Speed: " + speed, style);
 
-        speedUp = game.add.sprite(rightCol + 180, 140, 'plus');
+        speedUp = game.add.sprite(rightCol + 180, 180, 'plus');
         speedUp.name = 'speed';
         speedUp.inputEnabled = true;
         speedUp.input.useHandCursor = true;
         speedUp.events.onInputDown.add(increaseSpeed, this);
 
-        speedDown = game.add.sprite(rightCol + 220, 140, 'minus');
+        speedDown = game.add.sprite(rightCol + 220, 180, 'minus');
         speedDown.name = 'speed';
         speedDown.inputEnabled = true;
         speedDown.input.useHandCursor = true;
         speedDown.events.onInputDown.add(decreaseSpeed, this);
+
+
         
         //  Save Icon
-
         saveText = game.add.text(rightCol, 520, "Saved", style);
         saveText.alpha = 0;
 
@@ -398,8 +400,8 @@ window.onload = function() {
         resetData();
         resizeCanvas();
 
-        widthText.text = "Width: " + spriteWidth;
-        heightText.text = "Height: " + spriteHeight;
+        widthText.text = "X Tiles: " + spriteWidth;
+        heightText.text = "Y Tiles: " + spriteHeight;
 
     }
 
@@ -484,10 +486,8 @@ window.onload = function() {
                 "ytiles": spriteHeight
             },
             "initial_path": "default",
-            "obstacles": {
-                "walls": walls,
-                "traps": traps
-            }
+            "walls": walls,
+            "traps": traps
         }
         console.log(obj);
         return JSON.stringify(obj, null, 2);
@@ -623,8 +623,7 @@ window.onload = function() {
             if (colorIndex == TRAP) {
                 var open = prompt("Time open? ");
                 var closed = prompt("Time closed? ");
-                var position = {"x": x, "y": (spriteHeight-1-y)};
-                traps.push({"time_open": open, "time_closed": closed, "position": position})
+                traps.push({"time_open": parseInt(open), "time_closed": parseInt(closed), "x": x, "y": (spriteHeight-1-y)})
             }
             data[y][x] = pmap[colorIndex];
             canvas.rect(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);

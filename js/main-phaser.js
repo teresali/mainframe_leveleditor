@@ -1,14 +1,18 @@
 window.onload = function() {
-    var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'canvas', { create: create });
-
-    const WALL = 0;
-    const TRAP = 1;
-    const entities = ['W', 'T'];
+    var game = new Phaser.Game(800, 680, Phaser.CANVAS, 'canvas', { create: create });
+    const WALL = '0';
+    const TRAP = '1';
+    const MULTIPASS = '2';
+    const MULTIPASS_BARRIER = '3';
+    const COMBINATION = '4';
+    const entities = ['W', 'T', 'MP', 'B', 'C'];
     var traps = [];
+    var multipass = [];
+    var combination = [];
 
     //  Dimensions
-    var spriteWidth = 5;
-    var spriteHeight = 7;
+    var spriteWidth = 7;
+    var spriteHeight = 11;
     var speed = 50;
 
     //  UI
@@ -26,7 +30,7 @@ window.onload = function() {
     var speedDown;
     var saveIcon;
     var saveText;
-    var rightCol = 532;
+    var rightCol = 420;
 
     //  Drawing Area
     var canvas;
@@ -48,7 +52,7 @@ window.onload = function() {
     var ci = 0;
     var color = 0;
     var palette = 0;
-    var pmap = [WALL,TRAP, 2, 3, 4, 5, 6, 7, 8 , 9];
+    var pmap = [WALL,TRAP, MULTIPASS, 3, COMBINATION, 5, 6, 7, 8 , 9];
 
     //  Data
     var frame = 1;
@@ -71,7 +75,8 @@ window.onload = function() {
 
             data.push(a);
         }
-
+        var json = outputJSON();
+        $("#json").html(json);
     }
 
     function cloneData() {
@@ -152,53 +157,53 @@ window.onload = function() {
 
         ui.addToWorld();
 
-        var style = { font: "18px Helvetica", fill: "#fff", tabs: 80 };
+        var style = { font: "17px Helvetica", fill: "#fff", tabs: 80 };
 
         game.add.text(12, 9, entities.join("\t"), { font: "14px Helvetica", fill: "#607780", tabs: 32 });
 
         paletteArrow = game.add.sprite(8, 36, 'arrow');
 
-        widthText = game.add.text(rightCol, 60, "LEVEL CONFIG", { font: "18px Helvetica", fill: "#fff", tabs: 80 });
+        widthText = game.add.text(rightCol, 60, "LEVEL CONFIG", style);
         //  Change width
-        widthText = game.add.text(rightCol+20, 100, "X Tiles: " + spriteWidth, style);
+        widthText = game.add.text(rightCol+20, 100, "Board Width: " + spriteWidth, style);
 
-        widthUp = game.add.sprite(rightCol + 180, 100, 'plus');
+        widthUp = game.add.sprite(rightCol + 220, 100, 'plus');
         widthUp.name = 'width';
         widthUp.inputEnabled = true;
         widthUp.input.useHandCursor = true;
         widthUp.events.onInputDown.add(increaseSize, this);
 
-        widthDown = game.add.sprite(rightCol + 220, 100, 'minus');
+        widthDown = game.add.sprite(rightCol + 260, 100, 'minus');
         widthDown.name = 'width';
         widthDown.inputEnabled = true;
         widthDown.input.useHandCursor = true;
         widthDown.events.onInputDown.add(decreaseSize, this);
 
         //  Change height
-        heightText = game.add.text(rightCol+20, 140, "Y Tiles: " + spriteHeight, style);
+        heightText = game.add.text(rightCol+20, 140, "Board Height: " + spriteHeight, style);
 
-        heightUp = game.add.sprite(rightCol + 180, 140, 'plus');
+        heightUp = game.add.sprite(rightCol + 220, 140, 'plus');
         heightUp.name = 'height';
         heightUp.inputEnabled = true;
         heightUp.input.useHandCursor = true;
         heightUp.events.onInputDown.add(increaseSize, this);
 
-        heightDown = game.add.sprite(rightCol + 220, 140, 'minus');
+        heightDown = game.add.sprite(rightCol + 260, 140, 'minus');
         heightDown.name = 'height';
         heightDown.inputEnabled = true;
         heightDown.input.useHandCursor = true;
         heightDown.events.onInputDown.add(decreaseSize, this);
 
         // Change speed
-        speedText = game.add.text(rightCol+20, 180, "Speed: " + speed, style);
+        speedText = game.add.text(rightCol+20, 180, "Avatar Speed: " + speed, style);
 
-        speedUp = game.add.sprite(rightCol + 180, 180, 'plus');
+        speedUp = game.add.sprite(rightCol + 220, 180, 'plus');
         speedUp.name = 'speed';
         speedUp.inputEnabled = true;
         speedUp.input.useHandCursor = true;
         speedUp.events.onInputDown.add(increaseSpeed, this);
 
-        speedDown = game.add.sprite(rightCol + 220, 180, 'minus');
+        speedDown = game.add.sprite(rightCol + 260, 180, 'minus');
         speedDown.name = 'speed';
         speedDown.inputEnabled = true;
         speedDown.input.useHandCursor = true;
@@ -210,11 +215,10 @@ window.onload = function() {
         saveText = game.add.text(rightCol, 520, "Saved", style);
         saveText.alpha = 0;
 
-        saveIcon = game.add.sprite(750, 550, 'save');
+        saveIcon = game.add.sprite(660, 615, 'save');
         saveIcon.inputEnabled = true;
         saveIcon.input.useHandCursor = true;
         saveIcon.events.onInputDown.add(save, this);
-
     }
 
     function createDrawingArea() {
@@ -250,7 +254,6 @@ window.onload = function() {
     function refresh() {
         //  Update both the Canvas and Preview
         canvas.clear();
-        preview.clear();
 
         for (var y = 0; y < spriteHeight; y++)
         {
@@ -262,7 +265,6 @@ window.onload = function() {
                 {
                     color = game.create.palettes[palette][i];
                     canvas.rect(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
-                    // preview.rect(x * previewSize, y * previewSize, previewSize, previewSize, color);
                 }
             }
         }
@@ -400,8 +402,10 @@ window.onload = function() {
         resetData();
         resizeCanvas();
 
-        widthText.text = "X Tiles: " + spriteWidth;
-        heightText.text = "Y Tiles: " + spriteHeight;
+        widthText.text = "Board Width: " + spriteWidth;
+        heightText.text = "Board Height: " + spriteHeight;
+        var json = outputJSON();
+        $("#json").html(json);
 
     }
 
@@ -429,19 +433,27 @@ window.onload = function() {
         resetData();
         resizeCanvas();
 
-        widthText.text = "Width: " + spriteWidth;
-        heightText.text = "Height: " + spriteHeight;
+        widthText.text = "Board Width: " + spriteWidth;
+        heightText.text = "Board Height: " + spriteHeight;
 
+        var json = outputJSON();
+        $("#json").html(json);
     }
 
     function increaseSpeed() {
         speed++;
-        speedText.text = "Speed: " + speed;
+        speedText.text = "Avatar Speed: " + speed;
+
+        var json = outputJSON();
+        $("#json").html(json);
     }
 
     function decreaseSpeed() {
         speed--;
-        speedText.text = "Speed: " + speed;
+        speedText.text = "Avatar Speed: " + speed;
+
+        var json = outputJSON();
+        $("#json").html(json);
     }
 
     function create() {
@@ -462,9 +474,8 @@ window.onload = function() {
 
     }
 
-    function outputJSON() {
-        var levelid = prompt("Leved id?");
-
+    function outputJSON(levelid) {
+        frames[0] = cloneData();
         var src = frames[0];
 
         var walls = [];
@@ -487,14 +498,17 @@ window.onload = function() {
             },
             "initial_path": "default",
             "walls": walls,
-            "traps": traps
+            "traps": traps,
+            "multipass": multipass,
+            "combination": combination
         }
         console.log(obj);
         return JSON.stringify(obj, null, 2);
     }
 
     function saveToFile() {
-        var json = outputJSON();
+        var levelid = prompt("Leved id?");
+        var json = outputJSON(levelid);
         var blob = new Blob([json], {type: "text/plain;charset=utf-8"});
         var filename = "level" + String(JSON.parse(json)["id"]) + ".json";
         saveAs(blob, filename);
@@ -503,7 +517,6 @@ window.onload = function() {
 
     function save() {
         //  Save current frame
-        frames[frame - 1] = cloneData();
         saveToFile();
 
         var output = "";
@@ -542,6 +555,9 @@ window.onload = function() {
             data[y].push(r);
         }
 
+        var json = outputJSON();
+        $("#json").html(json);
+
     }
 
     function shiftRight() {
@@ -552,6 +568,9 @@ window.onload = function() {
             data[y].splice(0, 0, r);
         }
 
+        var json = outputJSON();
+        $("#json").html(json);
+
     }
 
     function shiftUp() {
@@ -560,6 +579,8 @@ window.onload = function() {
         var top = data.shift();
         data.push(top);
 
+        var json = outputJSON();
+        $("#json").html(json);
     }
 
     function shiftDown() {
@@ -568,6 +589,8 @@ window.onload = function() {
         var bottom = data.pop();
         data.splice(0, 0, bottom);
 
+        var json = outputJSON();
+        $("#json").html(json);
     }
 
     function onDown(pointer) {
@@ -588,7 +611,6 @@ window.onload = function() {
 
             paint(pointer);
         }
-
     }
 
     function onUp() {
@@ -609,25 +631,60 @@ window.onload = function() {
         }
 
         if (isErase) {
-            if (data[y][x] = TRAP) {
+            if (data[y][x] == TRAP) {
                 for (var i = 0; i < traps.length; i++) {
-                    if (traps[i].position.x == x && traps[i].position.y == (spriteHeight-1-y)) {
+                    if (traps[i].x == x && traps[i].y == (spriteHeight-1-y)) {
                         traps.splice(i, 1);
+                    }
+                }
+            } else if (data[y][x] == MULTIPASS) {
+                for (var i = 0; i < multipass.length; i++) {
+                    if (multipass[i].x == x && multipass[i].y == (spriteHeight-1-y)) {
+                        var barrierx = multipass[i].barrier.x;
+                        var barriery = spriteHeight-1-multipass[i].barrier.y;
+                        data[barriery][barrierx] = '.';
+                        canvas.clear(barrierx * canvasZoom, barriery * canvasZoom, canvasZoom, canvasZoom, game.create.palettes[palette][MULTIPASS_BARRIER]);
+                        multipass.splice(i, 1);
+                    }
+                }
+            } else if (data[y][x] == COMBINATION) {
+                for (var i = 0; i < combination.length; i++) {
+                    if (combination[i].x == x && combination[i].y == (spriteHeight-1-y)) {
+                        combination.splice(i, 1);
                     }
                 }
             }
             data[y][x] = '.';
             canvas.clear(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
-            preview.clear(x * previewSize, y * previewSize, previewSize, previewSize, color);
         } else {
             if (colorIndex == TRAP) {
-                var open = prompt("Time open? ");
-                var closed = prompt("Time closed? ");
-                traps.push({"time_open": parseInt(open), "time_closed": parseInt(closed), "x": x, "y": (spriteHeight-1-y)})
+                var open = parseInt(prompt("Time open? "));
+                var closed = parseInt(prompt("Time closed? "));
+                if (open == null|| closed == null) {
+                    return;
+                }
+                traps.push({"time_open": open, "time_closed": closed, "x": x, "y": (spriteHeight-1-y)})
+            } else if (colorIndex == MULTIPASS) {
+                var numHits = parseInt(prompt("Number of hits?"));
+                var barrierx = parseInt(prompt("Barrier X coordinate?"));
+                var barriery = parseInt(prompt("Barrier Y coordinate?"));
+                if (numHits == null || barrierx == null || barriery == null) {
+                    return;
+                }
+                multipass.push({"barrier": {"x": barrierx, "y": barriery}, "num_of_hits": numHits, "x": x, "y": (spriteHeight-1-y)});
+                data[(spriteHeight-1-barriery)][barrierx] = MULTIPASS_BARRIER;
+                canvas.rect(barrierx * canvasZoom, (spriteHeight-1-barriery) * canvasZoom, canvasZoom, canvasZoom, game.create.palettes[palette][MULTIPASS_BARRIER]);
+            } else if (colorIndex == COMBINATION) {
+                var isOpen = parseInt(prompt("Is open? open = 1"));
+                if (isOpen == null) {
+                    return;
+                }
+                combination.push({"isOpen": isOpen, "x": x, "y": (spriteHeight-1-y)});
             }
-            data[y][x] = pmap[colorIndex];
+            data[y][x] = String(pmap[colorIndex]);
             canvas.rect(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
         }
-
+        var json = outputJSON();
+        $("#json").html(json);
     }
 }

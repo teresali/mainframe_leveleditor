@@ -5,15 +5,19 @@ window.onload = function() {
     const MULTIPASS = '2';
     const MULTIPASS_BARRIER = '3';
     const COMBINATION = '4';
-    const entities = ['W', 'T', 'MP', 'B', 'C'];
+    const TELEPORT = '5';
+    const entities = ['W', 'T', 'MP', 'B', 'C', 'T'];
+
     var traps = [];
     var multipass = [];
     var combination = [];
+    var combinationnodes = [];
+    var teleport = [];
 
     //  Dimensions
     var spriteWidth = 7;
     var spriteHeight = 11;
-    var speed = 50;
+    var speed = 60;
 
     //  UI
     var ui;
@@ -500,7 +504,8 @@ window.onload = function() {
             "walls": walls,
             "traps": traps,
             "multipass": multipass,
-            "combination": combination
+            "combination": combination,
+            "teleport_obstacles": teleport
         }
         console.log(obj);
         return JSON.stringify(obj, null, 2);
@@ -617,6 +622,10 @@ window.onload = function() {
         isDown = false;
     }
 
+    function addElement(val) {
+
+    }
+
     function paint(pointer) {
         //  Get the grid loc from the pointer
         var x = game.math.snapToFloor(pointer.x - canvasSprite.x, canvasZoom) / canvasZoom;
@@ -653,38 +662,118 @@ window.onload = function() {
                         combination.splice(i, 1);
                     }
                 }
+            } else if (data[y][x] == TELEPORT) {
+                for (var i = 0; i < teleport.length; i++) {
+                    if (teleport[i].x == x && teleport[i].y == (spriteHeight-1-y)) {
+                        teleport.splice(i, 1);
+                    }
+                }
             }
             data[y][x] = '.';
             canvas.clear(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
         } else {
-            if (colorIndex == TRAP) {
-                var open = parseInt(prompt("Time open? "));
-                var closed = parseInt(prompt("Time closed? "));
-                if (open == null|| closed == null) {
-                    return;
-                }
-                traps.push({"time_open": open, "time_closed": closed, "x": x, "y": (spriteHeight-1-y)})
-            } else if (colorIndex == MULTIPASS) {
-                var numHits = parseInt(prompt("Number of hits?"));
-                var barrierx = parseInt(prompt("Barrier X coordinate?"));
-                var barriery = parseInt(prompt("Barrier Y coordinate?"));
-                if (numHits == null || barrierx == null || barriery == null) {
-                    return;
-                }
-                multipass.push({"barrier": {"x": barrierx, "y": barriery}, "num_of_hits": numHits, "x": x, "y": (spriteHeight-1-y)});
-                data[(spriteHeight-1-barriery)][barrierx] = MULTIPASS_BARRIER;
-                canvas.rect(barrierx * canvasZoom, (spriteHeight-1-barriery) * canvasZoom, canvasZoom, canvasZoom, game.create.palettes[palette][MULTIPASS_BARRIER]);
-            } else if (colorIndex == COMBINATION) {
-                var isOpen = parseInt(prompt("Is open? open = 1"));
-                if (isOpen == null) {
-                    return;
-                }
-                combination.push({"isOpen": isOpen, "x": x, "y": (spriteHeight-1-y)});
-            }
-            data[y][x] = String(pmap[colorIndex]);
-            canvas.rect(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
+            if(createEntity(colorIndex, x, y)) {
+                data[y][x] = String(pmap[colorIndex]);
+                canvas.rect(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
+            }   
         }
         var json = outputJSON();
         $("#json").html(json);
+    }
+
+    function createEntity(colorIndex, x, y) {
+        // TRAP ENTITY
+        if (colorIndex == TRAP) {
+                var open = parseInt(prompt("Time open? "));
+                var closed = parseInt(prompt("Time closed? "));
+                if (open == null|| closed == null) {
+                    return false;
+                }
+                traps.push({"time_open": open, "time_closed": closed, "x": x, "y": (spriteHeight-1-y)})
+        // MULTIPASS ENTITY
+        } else if (colorIndex == MULTIPASS) {
+            var numHits = parseInt(prompt("Number of hits?"));
+            var barrierx = parseInt(prompt("Barrier X coordinate?"));
+            var barriery = parseInt(prompt("Barrier Y coordinate?"));
+            if (numHits == null || numHits == NaN || barrierx == null || barrierx == NaN || barriery == null || barriery == NaN) {
+                return false;
+            }
+            multipass.push(
+                {
+                    "barrier": {
+                        "x": barrierx, 
+                        "y": barriery, 
+                        "texture_string": "mwall"
+                    }, 
+                    "num_of_hits": numHits, 
+                    "x": x, 
+                    "y": (spriteHeight-1-y),
+                    "texture_string": "mpswitch"
+                });
+            data[(spriteHeight-1-barriery)][barrierx] = MULTIPASS_BARRIER;
+            canvas.rect(barrierx * canvasZoom, (spriteHeight-1-barriery) * canvasZoom, canvasZoom, canvasZoom, game.create.palettes[palette][MULTIPASS_BARRIER]);
+        // COMBINATION ENTITY
+        } else if (colorIndex == COMBINATION) {
+            var isOn = parseInt(prompt("Is on? on = 1"));
+            var last = confirm("Is this the last switch? OK = yes");
+            if (isOn == 1) {
+                isOn = true;
+            } else {
+                isOn = false;
+            }
+            if (isOn == null) {
+                return false;
+            }
+            combinationnodes.push(
+                {
+                    "isOn": isOn, 
+                    "x": x, 
+                    "y": (spriteHeight-1-y),
+                     "texture_string": "combswitch"
+                }
+            );
+            if (last) {
+                var barrierx = parseInt(prompt("Barrier X coordinate?"));
+                var barriery = parseInt(prompt("Barrier Y coordinate?"));
+                if (barrierx == null || barrierx == NaN || barriery == null || barriery == NaN) {
+                    return false;
+                }
+                var combobject = {
+                    "nodes": combinationnodes,
+                    "barrier": {
+                        "x": barrierx,
+                        "y": barriery,
+                        "texture_string": "combwall"
+                    }
+                }
+                combination.push(combobject);
+
+                data[(spriteHeight-1-barriery)][barrierx] = MULTIPASS_BARRIER;
+                canvas.rect(barrierx * canvasZoom, (spriteHeight-1-barriery) * canvasZoom, canvasZoom, canvasZoom, game.create.palettes[palette][MULTIPASS_BARRIER]);
+            }            
+        // TELEPORT ENTITY
+        } else if (colorIndex == TELEPORT) {
+            var path = prompt("Teleport path? R L U D separated by a comma. Ex. R,U,D,L,L is right up down left left");
+            if (!path) {
+                return false;
+            }
+            var patharr = path.split(",");
+            for (var k = 0; k < patharr.length; k++) {
+                if (!(patharr[k] ==="R" || patharr[k] === "L" || patharr[k]=== "D" || patharr[k] === "U")) {
+                    prompt("Incorrect format: Used character other than RLUD");
+                    return false;
+                }
+            }
+            teleport.push(
+                {
+                    "texture": "teleport",
+                    "x": x, 
+                    "y": (spriteHeight-1-y),
+                    "teleports": patharr
+                }
+            );
+
+        }
+        return true;
     }
 }

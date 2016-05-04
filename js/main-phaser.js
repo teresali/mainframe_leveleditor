@@ -658,8 +658,12 @@ window.onload = function() {
                 }
             } else if (data[y][x] == COMBINATION) {
                 for (var i = 0; i < combination.length; i++) {
-                    if (combination[i].x == x && combination[i].y == (spriteHeight-1-y)) {
-                        combination.splice(i, 1);
+                    for (var j = 0; j < combination[i]["nodes"].length; j++) {
+                        combination[i]["nodes"][j].x
+
+                        if (combination[i]["nodes"][j].x == x && combination[i]["nodes"][j].y == (spriteHeight-1-y)) {
+                            combination[i]["nodes"].splice(j, 1);
+                        }
                     }
                 }
             } else if (data[y][x] == TELEPORT) {
@@ -716,6 +720,10 @@ window.onload = function() {
         } else if (colorIndex == COMBINATION) {
             var isOn = parseInt(prompt("Is on? on = 1"));
             var last = confirm("Is this the last switch? OK = yes");
+
+            if (isOn == null || last == null) {
+                return false;
+            }
             if (isOn == 1) {
                 isOn = true;
             } else {
@@ -750,6 +758,7 @@ window.onload = function() {
 
                 data[(spriteHeight-1-barriery)][barrierx] = MULTIPASS_BARRIER;
                 canvas.rect(barrierx * canvasZoom, (spriteHeight-1-barriery) * canvasZoom, canvasZoom, canvasZoom, game.create.palettes[palette][MULTIPASS_BARRIER]);
+                combinationnodes = [];
             }            
         // TELEPORT ENTITY
         } else if (colorIndex == TELEPORT) {

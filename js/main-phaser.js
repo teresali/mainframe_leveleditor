@@ -478,7 +478,7 @@ window.onload = function() {
 
     }
 
-    function outputJSON(levelid) {
+    function outputJSON(levelid, twostar, threestar) {
         frames[0] = cloneData();
         var src = frames[0];
 
@@ -493,12 +493,16 @@ window.onload = function() {
         }
 
         var obj = {
-            "id": parseInt(levelid),
+            "id": levelid,
             "background": "default",
             "config": {
                 "speed": speed,
                 "xtiles": spriteWidth,
                 "ytiles": spriteHeight
+            },
+            "reward_threshold": {
+                "3star": threestar,
+                "2star": twostar
             },
             "initial_path": "default",
             "walls": walls,
@@ -512,8 +516,10 @@ window.onload = function() {
     }
 
     function saveToFile() {
-        var levelid = prompt("Leved id?");
-        var json = outputJSON(levelid);
+        var levelid = parseInt(prompt("Leved id?"));
+        var twostar = parseInt(prompt("Two star?"));
+        var threestar = parseInt(prompt("Three star?"));
+        var json = outputJSON(levelid, twostar, threestar);
         var blob = new Blob([json], {type: "text/plain;charset=utf-8"});
         var filename = "level" + String(JSON.parse(json)["id"]) + ".json";
         saveAs(blob, filename);

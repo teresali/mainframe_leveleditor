@@ -478,7 +478,7 @@ window.onload = function() {
 
     }
 
-    function outputJSON(levelid, twostar, threestar) {
+    function outputJSON(levelid, twostar, threestar, levelname) {
         frames[0] = cloneData();
         var src = frames[0];
 
@@ -494,6 +494,7 @@ window.onload = function() {
 
         var obj = {
             "id": levelid,
+            "name": levelname,
             "background": "default",
             "config": {
                 "speed": speed,
@@ -517,9 +518,10 @@ window.onload = function() {
 
     function saveToFile() {
         var levelid = parseInt(prompt("Leved id?"));
+        var levelname = prompt("Leved name?");
         var twostar = parseInt(prompt("Two star?"));
         var threestar = parseInt(prompt("Three star?"));
-        var json = outputJSON(levelid, twostar, threestar);
+        var json = outputJSON(levelid, twostar, threestar, levelname);
         var blob = new Blob([json], {type: "text/plain;charset=utf-8"});
         var filename = "level" + String(JSON.parse(json)["id"]) + ".json";
         saveAs(blob, filename);

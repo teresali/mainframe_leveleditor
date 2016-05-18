@@ -478,7 +478,7 @@ window.onload = function() {
 
     }
 
-    function outputJSON(levelid, twostar, threestar, levelname) {
+    function outputJSON(levelid, twostar, threestar, levelname, logtitle, logpicture, logcontent) {
         frames[0] = cloneData();
         var src = frames[0];
 
@@ -505,6 +505,11 @@ window.onload = function() {
                 "3star": threestar,
                 "2star": twostar
             },
+            "log": {
+                "title": logtitle,
+                "picture": logpicture,
+                "content": logcontent
+            },
             "initial_path": "default",
             "walls": walls,
             "traps": traps,
@@ -519,12 +524,21 @@ window.onload = function() {
     function saveToFile() {
         var levelid = parseInt(prompt("Leved id?"));
         var levelname = prompt("Leved name?");
+        var logtitle = prompt("Log title?");
+        var logpicture = prompt("Log picture?");
+        var logcontent = prompt("Copy and past log content with newlines here:");
         var twostar = parseInt(prompt("Two star?"));
         var threestar = parseInt(prompt("Three star?"));
-        var json = outputJSON(levelid, twostar, threestar, levelname);
-        var blob = new Blob([json], {type: "text/plain;charset=utf-8"});
-        var filename = "level" + String(JSON.parse(json)["id"]) + ".json";
-        saveAs(blob, filename);
+
+        if (levelid && levelname && logtitle && logpicture && logcontent && twostar && threestar) {
+            var json = outputJSON(levelid, twostar, threestar, levelname, logtitle, logpicture, logcontent);
+            var blob = new Blob([json], {type: "text/plain;charset=utf-8"});
+            var filename = "level" + String(JSON.parse(json)["id"]) + ".json";
+            saveAs(blob, filename);
+        } else {
+            alert("Incorrect format of inputs");
+        }
+        
         return filename;
     }
 
